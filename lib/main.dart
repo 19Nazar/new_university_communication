@@ -1,14 +1,22 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:new_university_communication/modules/app_module.dart';
 import 'package:new_university_communication/routes/routes.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() {
   runZonedGuarded(() async {
     WidgetsFlutterBinding.ensureInitialized();
+    await dotenv.load();
+    // initialize Supabase
+    await Supabase.initialize(
+      url: dotenv.env['SUPABASE_URL'] ?? '',
+      anonKey: dotenv.env['SUPABASE_KEY'] ?? '',
+    );
     //Catch Errors caught by Flutter
     FlutterError.onError = (details) {
       FlutterError.presentError(details);
@@ -38,7 +46,7 @@ class AppWidget extends StatelessWidget {
     );
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
-      title: 'NEW ERA APP TEMPLATE',
+      title: 'NEW UNIVERSITY COMMUNICATION',
       routeInformationParser: Modular.routeInformationParser,
       routerDelegate: Modular.routerDelegate,
     );

@@ -19,6 +19,4 @@ abstract class RouteClass {
 
 class _Template extends RouteClass {
   String init = '/';
-  String ai_model_land = '/ai_model_land';
-  String flutterchain = '/flutterchain';
 }
