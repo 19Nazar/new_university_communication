@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1044858124129",
+    "project_id": "new-university-communication",
+    "storage_bucket": "new-university-communication.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1044858124129:android:dc4faf63e3503a82d9f720",
+        "android_client_info": {
+          "package_name": "com.new_university_communication.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD2F61wrRR2uf2YBtJma6GAlrwF3E3UQYE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

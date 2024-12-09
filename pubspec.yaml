@@ -16,6 +16,8 @@ dependencies:
   flutter_screenutil: 5.9.1
   supabase_flutter: ^2.8.1
   flutter_dotenv: ^5.0.2
+  firebase_core: ^3.8.1
+  firebase_messaging: ^15.1.6
 
 
 dev_dependencies:
@@ -30,4 +32,5 @@ flutter:
 
   assets:
     - assets/nfc_web_interaction.js
+    - assets/.env
   

@@ -19,4 +19,6 @@ abstract class RouteClass {
 
 class _Template extends RouteClass {
   String init = '/';
+
+  String notificationHandler = "/notification-handler";
 }
