@@ -1,6 +1,3 @@
-import 'dart:io';
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:new_university_communication/shared_widgets/custom_appbar.dart';
@@ -19,24 +16,38 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   String platformVersion = '';
 
-  Future<bool>? suportNFC;
-
-  Future<List<dynamic>>? infoScan;
-
-  Service service = Service();
+  Service service = Service.defaultInstance();
 
   @override
   void initState() {
+    // final key = service.generateRSAKeyPair();
+    // print(key);
+    // print(service.derivePublicKeyFromPrivate(key.privateKey));
     super.initState();
-    final isSuport = service.isNfCAvailable();
-    suportNFC = isSuport;
   }
 
-  Future<void> scanNFC() async {
-    final res = await service.scanNFC();
-    setState(() {
-      infoScan = Future.value(res);
-    });
+  Future<void> readData() async {
+    final res = await service.readDB(table_name: "groups", select: "*");
+    print(res.data);
+  }
+
+  Future<void> createData() async {
+    final res = await service.createDB(
+        data: {"group": "ІСДМ-62", "department_id": 1}, table_name: "groups");
+    print(res.data);
+  }
+
+  Future<void> updateData() async {
+    final res = await service.updateDB(
+        table_name: "groups",
+        id: 4,
+        data: {"group": "ІСДМ-60", "department_id": 1});
+    print(res.data);
+  }
+
+  Future<void> deleteData() async {
+    final res = await service.delete(id: 4, table_name: "groups");
+    print(res.data);
   }
 
   @override
@@ -49,62 +60,38 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            suportNFC == null
-                ? Container()
-                : FutureBuilder<bool>(
-                    future: suportNFC,
-                    builder:
-                        (BuildContext context, AsyncSnapshot<bool> snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
-                      } else if (snapshot.hasError) {
-                        return SelectableText('Error: ${snapshot.error}');
-                      } else {
-                        return Center(
-                            child: Text(
-                          '${snapshot.data.toString()}',
-                          style: Thems.textStyle,
-                        ));
-                      }
-                    },
-                  ),
-            CustomButton(onPressed: (() {}), text: "Student card ID number"),
+            CustomButton(
+                onPressed: (() async {
+                  await readData();
+                }),
+                text: "readData"),
             SizedBox(height: 10),
             CustomButton(
                 onPressed: (() async {
-                  await scanNFC();
+                  await createData();
                 }),
-                text: "Scan student card"),
+                text: "createData"),
             SizedBox(height: 10),
-            infoScan != null
-                ? FutureBuilder<List<dynamic>>(
-                    future: infoScan,
-                    builder: (BuildContext context,
-                        AsyncSnapshot<List<dynamic>> snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
-                      } else if (snapshot.hasError) {
-                        return SelectableText('Error: ${snapshot.error}');
-                      } else if (snapshot.hasData) {
-                        final data = snapshot.data!;
-                        return Column(
-                          children: data.map((info) {
-                            final res = info as Map<String, dynamic>;
-                            return SelectableText(
-                                "Type: ${res["type"]}, Data: ${res["data"]}");
-                          }).toList(),
-                        );
-                      } else {
-                        return Center(
-                          child: Text(
-                            'No data available',
-                            style: Thems.textStyle,
-                          ),
-                        );
-                      }
-                    },
-                  )
-                : Container(),
+            CustomButton(
+                onPressed: (() async {
+                  await updateData();
+                }),
+                text: "updateData"),
+            SizedBox(height: 10),
+            CustomButton(
+                onPressed: (() async {
+                  final key = await service.generateRSAKeyPair();
+                  print(key);
+                  print(service.derivePublicKeyFromPrivate().toString());
+                }),
+                text: "deleteData"),
+            SizedBox(height: 10),
+            CustomButton(
+                onPressed: (() {
+                  Modular.to.pushNamed('//home/auth-teacher-module');
+                }),
+                text: "Student card ID number"),
+            SizedBox(height: 10),
           ],
         ),
       ),

@@ -3,7 +3,16 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:new_university_communication/models/models.dart';
 
 class SupabaseDbInteraction implements DbInteraction {
-  final SupabaseClient supabase = Supabase.instance.client;
+  late SupabaseClient supabase;
+
+  SupabaseDbInteraction({required SupabaseClient client}) {
+    this.supabase = client;
+    this.supabase.auth;
+  }
+
+  factory SupabaseDbInteraction.defaultInstance() {
+    return SupabaseDbInteraction(client: Supabase.instance.client);
+  }
 
   @override
   Future<DBRespons> create(
@@ -21,23 +30,23 @@ class SupabaseDbInteraction implements DbInteraction {
 
   @override
   Future<DBRespons> read({
-    required Object? filter,
+    Object? filter,
     required String table_name,
-    required String select,
-    required String? filterColumn,
+    String? select = "*",
+    String? filterColumn,
   }) async {
     try {
-      var query = supabase.from(table_name).select(select);
+      var query = await supabase.from(table_name).select();
 
-      if (filter != null && filterColumn != null) {
-        query = query.eq(filterColumn, filter);
-      }
+      // if (filter != null && filterColumn != null) {
+      //   query = query.eq(filterColumn, filter);
+      // }
 
-      final response = await query;
-      if (response.contains("error")) {
-        return DBRespons(status: Status.fail, data: response);
-      }
-      return DBRespons(status: Status.successful, data: response);
+      // final response = await query;
+      // if (response.contains("error")) {
+      //   return DBRespons(status: Status.fail, data: response);
+      // }
+      return DBRespons(status: Status.successful, data: query);
     } catch (error) {
       throw Exception("Error while read db: $error");
     }
@@ -67,7 +76,7 @@ class SupabaseDbInteraction implements DbInteraction {
   }) async {
     try {
       final response =
-          await supabase.from('table_name').delete().eq('id', id).select();
+          await supabase.from(table_name).delete().eq('id', id).select();
       if (response.contains("error")) {
         return DBRespons(status: Status.fail, data: response);
       }

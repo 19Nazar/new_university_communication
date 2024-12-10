@@ -7,10 +7,10 @@ abstract class DbInteraction {
   }
 
   Future<DBRespons> read({
-    required Object? filter,
+    Object? filter,
     required String table_name,
-    required String select,
-    required String? filterColumn,
+    String? select,
+    String? filterColumn,
   }) {
     throw UnimplementedError("Not implemented");
   }

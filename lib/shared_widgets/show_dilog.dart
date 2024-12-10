@@ -14,20 +14,16 @@ class NotificationHandlerPage extends StatelessWidget {
     final String title = args['title'] ?? 'No Title';
     final String body = args['body'] ?? 'No Body';
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Notification')),
-      body: Center(
-        child: AlertDialog(
-          title: Text(title),
-          content: Text(body),
-          actions: [
-            TextButton(
-              onPressed: () => Modular.to.pop(context),
-              child: const Text('OK'),
-            ),
-          ],
-        ),
-      ),
+    return AlertDialog(
+      title: Text(title),
+      content: Text(body),
+      actions: [
+        TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: Text("Ok"))
+      ],
     );
   }
 }

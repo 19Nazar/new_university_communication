@@ -50,8 +50,9 @@ void main() {
     await dotenv.load();
     // initialize Supabase
     await Supabase.initialize(
-      url: dotenv.env['SUPABASE_URL'] ?? '',
-      anonKey: dotenv.env['SUPABASE_KEY'] ?? '',
+      url: 'https://soaxknieinirtcbpdpul.supabase.co',
+      anonKey:
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNvYXhrbmllaW5pcnRjYnBkcHVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM1MDIxMDAsImV4cCI6MjA0OTA3ODEwMH0.Zaurzdqh8NaS2kxNaF6apWaxmVNxxfEgThAzv6lKyqM',
     );
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
