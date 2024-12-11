@@ -16,8 +16,6 @@ class PushNotifications {
       provisional: false,
       sound: true,
     );
-
-    getFCMToken();
   }
 
 // get the fcm device token

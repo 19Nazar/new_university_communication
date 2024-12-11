@@ -36,17 +36,17 @@ class SupabaseDbInteraction implements DbInteraction {
     String? filterColumn,
   }) async {
     try {
-      var query = await supabase.from(table_name).select();
+      var query = supabase.from(table_name).select();
 
-      // if (filter != null && filterColumn != null) {
-      //   query = query.eq(filterColumn, filter);
-      // }
+      if (filter != null && filterColumn != null) {
+        query = query.eq(filterColumn, filter);
+      }
 
-      // final response = await query;
-      // if (response.contains("error")) {
-      //   return DBRespons(status: Status.fail, data: response);
-      // }
-      return DBRespons(status: Status.successful, data: query);
+      final response = await query;
+      if (response.contains("error")) {
+        return DBRespons(status: Status.fail, data: response);
+      }
+      return DBRespons(status: Status.successful, data: response);
     } catch (error) {
       throw Exception("Error while read db: $error");
     }

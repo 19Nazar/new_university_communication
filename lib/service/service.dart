@@ -1,14 +1,6 @@
-import 'dart:convert';
-import 'dart:io';
-import 'package:basic_utils/basic_utils.dart';
-import 'package:flutter/foundation.dart';
+import 'package:new_university_communication/service/crypto/crypto_i.dart';
+import 'package:new_university_communication/service/crypto/impl/crypto.dart';
 
-import 'dart:typed_data';
-import 'package:pointycastle/export.dart';
-import 'dart:convert';
-
-import 'package:pointycastle/export.dart';
-import 'package:flutter/services.dart';
 import 'package:new_university_communication/models/models.dart';
 import 'package:new_university_communication/service/db_interaction/db_interaction.dart';
 import 'package:new_university_communication/service/db_interaction/implement/supabase_db.dart';
@@ -21,53 +13,38 @@ import 'package:new_university_communication/service/js_engines/js_vm.dart';
 class Service {
   late JsVMService jsVMService;
   late DbInteraction dbService;
+  late CryptoI crypto;
 
   Service(
-      {required JsVMService jsVMService, required DbInteraction dbService}) {
+      {required JsVMService jsVMService,
+      required DbInteraction dbService,
+      required CryptoI crypto}) {
     this.jsVMService = jsVMService;
     this.dbService = dbService;
+    this.crypto = crypto;
   }
 
   factory Service.defaultInstance() {
     return Service(
         jsVMService: getJsVM(),
-        dbService: SupabaseDbInteraction.defaultInstance());
+        dbService: SupabaseDbInteraction.defaultInstance(),
+        crypto: Crypto.defaultInstance());
   }
 
-  AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey> generateRSAKeyPair() {
-    final secureRandom = FortunaRandom();
-    secureRandom.seed(KeyParameter(Uint8List.fromList(List.generate(
-      32,
-      (_) => DateTime.now().millisecondsSinceEpoch % 256,
-    ))));
-
-    final keyGen = RSAKeyGenerator()
-      ..init(ParametersWithRandom(
-        RSAKeyGeneratorParameters(BigInt.from(65537), 2048, 12),
-        secureRandom,
-      ));
-
-    return keyGen.generateKeyPair()
-        as AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey>;
+  Future<Map<String, String>> generateRSAKeyPairInIsolate() async {
+    return crypto.generateRSAKeyPairInIsolate();
   }
 
-  String privateKeyToString(RSAPrivateKey privateKey) {
-    return CryptoUtils.encodeRSAPrivateKeyToPem(privateKey);
+  String privateKeyToString(dynamic privateKey) {
+    return crypto.privateKeyToString(privateKey);
   }
 
-  String publicKeyToString(RSAPublicKey publicKey) {
-    return CryptoUtils.encodeRSAPublicKeyToPem(publicKey);
+  String publicKeyToString(dynamic publicKey) {
+    return crypto.publicKeyToString(publicKey);
   }
 
   String derivePublicKeyFromPrivate(String privateKeyPem) {
-    // Декодирование приватного ключа из PEM
-    final privateKey = CryptoUtils.rsaPrivateKeyFromPem(privateKeyPem);
-
-    // Извлечение публичного ключа
-    final publicKey = RSAPublicKey(privateKey.n!, privateKey.exponent!);
-
-    // Кодирование публичного ключа в PEM
-    return CryptoUtils.encodeRSAPublicKeyToPem(publicKey);
+    return crypto.derivePublicKeyFromPrivate(privateKeyPem);
   }
   // Future<bool> isNfCAvailable() async {
   //   try {
@@ -143,6 +120,15 @@ class Service {
     return res;
   }
 
+  Future<DBRespons> logIn({required String publicKey}) async {
+    return await this.readDB(
+        table_name: "auth", filterColumn: "public_key", filter: publicKey);
+  }
+
+  Future<DBRespons> getTeacherRows({required int id}) async {
+    return await this
+        .readDB(table_name: "teacher", filterColumn: "id", filter: id);
+  }
   // //for future mobile
   // Future<bool> isNfcAvailable() async {
   //   try {

@@ -1,10 +1,11 @@
 enum Status { successful, fail }
 
 class DBRespons {
-  dynamic data;
+  late List<Map<String, dynamic>> data;
   late Status status;
 
-  DBRespons({required dynamic data, required Status status}) {
+  DBRespons(
+      {required List<Map<String, dynamic>> data, required Status status}) {
     this.data = data;
     this.status = status;
   }

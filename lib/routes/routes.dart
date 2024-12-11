@@ -22,6 +22,7 @@ class _Template extends RouteClass {
 
   String auth_teacher_module = "/auth-teacher-module";
   String auth_student_module = "/auth-student-module";
+  String admin = "/admin";
 
   String notificationHandler = "/notification-handler";
 }

@@ -20,6 +20,7 @@ dependencies:
   firebase_messaging: ^15.1.6
   pointycastle: ^3.9.0
   basic_utils: ^5.7.0
+  shared_preferences: ^2.3.3
 
 
 dev_dependencies:

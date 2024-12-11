@@ -1,7 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:new_university_communication/models/models.dart';
 import 'package:new_university_communication/shared_widgets/custom_appbar.dart';
 import 'package:new_university_communication/shared_widgets/custom_button.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../service/service.dart';
 import '../../../thems/thems.dart';
@@ -15,6 +19,8 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   String platformVersion = '';
+
+  final TextEditingController privetKeyController = TextEditingController();
 
   Service service = Service.defaultInstance();
 
@@ -50,6 +56,95 @@ class _HomePageState extends State<HomePage> {
     print(res.data);
   }
 
+  Future<void> logIn({required String pubKey}) async {
+    final user = await service.logIn(publicKey: pubKey);
+    final userData = user.data;
+
+    if (userData.isEmpty) {
+      showDialog(
+        context: context,
+        builder: (context) => const Text("User not found"),
+      );
+      return;
+    }
+
+    if (userData.first["teacher_id"] != null) {
+      final data =
+          await service.getTeacherRows(id: userData.first["teacher_id"]);
+      if (data == Status.successful) {
+        final SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString("data", jsonEncode(data.data.first));
+        Modular.to.pushNamed("//home/auth-teacher-module",
+            arguments: data.data.first);
+      } else {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text("Error"),
+            content: Text(
+                "Notify the administration of the error ${data.data.toString()}"),
+          ),
+        );
+      }
+    } else if (userData.first["student_id"] != null) {
+      final data =
+          await service.getTeacherRows(id: userData.first["student_id"]);
+      if (data == Status.successful) {
+        final SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString("data", jsonEncode(data.data.first));
+        Modular.to.pushNamed("//home/auth-teacher-module",
+            arguments: data.data.first);
+      } else {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text("Error"),
+            content: Text(
+                "Notify the administration of the error ${data.data.toString()}"),
+          ),
+        );
+      }
+      Modular.to.pushNamed("//home/auth-student-module");
+    } else {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text("Error"),
+          content: Text("Notify the administration of the error"),
+        ),
+      );
+    }
+  }
+
+  void showLoginModal() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: privetKeyController,
+                  decoration: InputDecoration(labelText: "Input privet key: "),
+                ),
+                CustomButton(
+                    onPressed: () async {
+                      logIn(pubKey: privetKeyController.text);
+                    },
+                    text: "Log In")
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -58,6 +153,7 @@ class _HomePageState extends State<HomePage> {
       body: Container(
         padding: EdgeInsets.all(10),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             CustomButton(
@@ -80,17 +176,19 @@ class _HomePageState extends State<HomePage> {
             SizedBox(height: 10),
             CustomButton(
                 onPressed: (() async {
-                  final key = await service.generateRSAKeyPair();
+                  final key = await service.generateRSAKeyPairInIsolate();
                   print(key);
-                  print(service.derivePublicKeyFromPrivate().toString());
+                  print(service.derivePublicKeyFromPrivate(key["privateKey"]!));
                 }),
                 text: "deleteData"),
             SizedBox(height: 10),
             CustomButton(
-                onPressed: (() {
-                  Modular.to.pushNamed('//home/auth-teacher-module');
-                }),
+                onPressed: (() => showLoginModal()),
                 text: "Student card ID number"),
+            SizedBox(height: 10),
+            CustomButton(
+                onPressed: (() => {Modular.to.pushNamed("//home/admin")}),
+                text: "Admin"),
             SizedBox(height: 10),
           ],
         ),
