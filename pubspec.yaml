@@ -21,6 +21,7 @@ dependencies:
   pointycastle: ^3.9.0
   basic_utils: ^5.7.0
   shared_preferences: ^2.3.3
+  intl: ^0.18.0
 
 
 dev_dependencies:

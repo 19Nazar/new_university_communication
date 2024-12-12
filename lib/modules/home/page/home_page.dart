@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:new_university_communication/models/models.dart';
+import 'package:new_university_communication/service/push_notification.dart';
 import 'package:new_university_communication/shared_widgets/custom_appbar.dart';
 import 'package:new_university_communication/shared_widgets/custom_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -24,13 +25,7 @@ class _HomePageState extends State<HomePage> {
 
   Service service = Service.defaultInstance();
 
-  @override
-  void initState() {
-    // final key = service.generateRSAKeyPair();
-    // print(key);
-    // print(service.derivePublicKeyFromPrivate(key.privateKey));
-    super.initState();
-  }
+  String? tokenFCM;
 
   Future<void> readData() async {
     final res = await service.readDB(table_name: "groups", select: "*");
@@ -56,26 +51,34 @@ class _HomePageState extends State<HomePage> {
     print(res.data);
   }
 
-  Future<void> logIn({required String pubKey}) async {
+  Future<void> logIn({required String privetKey}) async {
+    final pubKey = service.derivePublicKeyFromPrivate(privetKey);
     final user = await service.logIn(publicKey: pubKey);
     final userData = user.data;
 
     if (userData.isEmpty) {
       showDialog(
         context: context,
-        builder: (context) => const Text("User not found"),
+        builder: (context) => AlertDialog(
+          title: Text("Error"),
+          content: Text("User not found"),
+        ),
       );
       return;
     }
 
     if (userData.first["teacher_id"] != null) {
-      final data =
-          await service.getTeacherRows(id: userData.first["teacher_id"]);
-      if (data == Status.successful) {
-        final SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString("data", jsonEncode(data.data.first));
-        Modular.to.pushNamed("//home/auth-teacher-module",
-            arguments: data.data.first);
+      final data = await service.getUserRows(
+          id: userData.first["teacher_id"], table_name: "teacher");
+      if (data.status == Status.successful) {
+        final isAddFCM =
+            await provideFCM(data: data.data.first, table_name: "teacher");
+        if (isAddFCM == true) {
+          final SharedPreferences prefs = await SharedPreferences.getInstance();
+          await prefs.setString(
+              "data", jsonEncode({"teacher": data.data.first}));
+          Modular.to.pushNamed("//home/auth-teacher-module");
+        }
       } else {
         showDialog(
           context: context,
@@ -87,13 +90,17 @@ class _HomePageState extends State<HomePage> {
         );
       }
     } else if (userData.first["student_id"] != null) {
-      final data =
-          await service.getTeacherRows(id: userData.first["student_id"]);
-      if (data == Status.successful) {
-        final SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString("data", jsonEncode(data.data.first));
-        Modular.to.pushNamed("//home/auth-teacher-module",
-            arguments: data.data.first);
+      final data = await service.getUserRows(
+          id: userData.first["student_id"], table_name: "student");
+      if (data.status == Status.successful) {
+        final isAddFCM =
+            await provideFCM(data: data.data.first, table_name: "student");
+        if (isAddFCM == true) {
+          final SharedPreferences prefs = await SharedPreferences.getInstance();
+          await prefs.setString(
+              "data", jsonEncode({"student": data.data.first}));
+          Modular.to.pushNamed("//home/auth-teacher-module");
+        }
       } else {
         showDialog(
           context: context,
@@ -116,6 +123,39 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  Future<bool> provideFCM(
+      {required Map<String, dynamic> data, required String table_name}) async {
+    final res = await service.updateDB(
+        table_name: table_name,
+        id: data["id"],
+        data: {"token": tokenFCM.toString()});
+    if (res.status == Status.successful) {
+      return true;
+    } else {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text("Error"),
+          content: Text("Get FMC error: ${res.data.first.toString()}"),
+        ),
+      );
+      return false;
+    }
+  }
+
+  Future<void> getFCM() async {
+    final token = await PushNotifications.getFCMToken();
+    setState(() {
+      tokenFCM = token;
+    });
+  }
+
+  @override
+  void initState() {
+    getFCM();
+    super.initState();
+  }
+
   void showLoginModal() {
     showDialog(
       context: context,
@@ -134,7 +174,7 @@ class _HomePageState extends State<HomePage> {
                 ),
                 CustomButton(
                     onPressed: () async {
-                      logIn(pubKey: privetKeyController.text);
+                      logIn(privetKey: privetKeyController.text);
                     },
                     text: "Log In")
               ],
@@ -182,9 +222,7 @@ class _HomePageState extends State<HomePage> {
                 }),
                 text: "deleteData"),
             SizedBox(height: 10),
-            CustomButton(
-                onPressed: (() => showLoginModal()),
-                text: "Student card ID number"),
+            CustomButton(onPressed: (() => showLoginModal()), text: "Log In"),
             SizedBox(height: 10),
             CustomButton(
                 onPressed: (() => {Modular.to.pushNamed("//home/admin")}),

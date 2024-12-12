@@ -32,14 +32,21 @@ class SupabaseDbInteraction implements DbInteraction {
   Future<DBRespons> read({
     Object? filter,
     required String table_name,
-    String? select = "*",
+    String? select,
     String? filterColumn,
+    String? filterColumnIn,
+    List<dynamic>? filterIn,
   }) async {
+    select = select ?? "*";
     try {
-      var query = supabase.from(table_name).select();
+      var query = supabase.from(table_name).select(select);
 
       if (filter != null && filterColumn != null) {
         query = query.eq(filterColumn, filter);
+      }
+
+      if (filterIn != null && filterColumnIn != null) {
+        query = query.inFilter(filterColumnIn, filterIn);
       }
 
       final response = await query;
@@ -83,6 +90,32 @@ class SupabaseDbInteraction implements DbInteraction {
       return DBRespons(status: Status.successful, data: response);
     } catch (error) {
       throw Exception("Error while update db: $error");
+    }
+  }
+
+  Future<void> fetchEventHistoryWithRpc() async {
+    final supabase = Supabase.instance.client;
+
+    final response = await supabase.rpc('custom_sql_query', params: {
+      'query': """
+      SELECT 
+        event_history.event,
+        event_history.event_details,
+        event_history.time_create_event,
+        teacher.name,
+        teacher.surname,
+        department.department
+      FROM 
+        event_history
+      JOIN teacher ON event_history.creator_id = teacher.id
+      JOIN department ON teacher.department_id = department.id
+    """
+    });
+
+    if (response.error != null) {
+      print('Error: ${response.error?.message}');
+    } else {
+      print('Data: ${response.data}');
     }
   }
 }

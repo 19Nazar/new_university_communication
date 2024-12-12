@@ -8,9 +8,6 @@ class AuthTeacherModule extends Module {
 
   @override
   void routes(r) {
-    r.child(Routes.template.init,
-        child: (context) => AuthTeacherPage(
-              args: r.args as Map<String, dynamic>,
-            ));
+    r.child(Routes.template.init, child: (context) => AuthTeacherPage());
   }
 }

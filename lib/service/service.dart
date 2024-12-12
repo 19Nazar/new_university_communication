@@ -9,6 +9,7 @@ import 'package:new_university_communication/service/js_engines/js_engine_stub.d
     if (dart.library.js) 'package:new_university_communication/service/js_engines/implementation/web_js_engine.dart';
 import 'package:new_university_communication/service/js_engines/js_vm.dart';
 // import 'package:flutter_nfc_kit/flutter_nfc_kit.dart';
+import 'package:http/http.dart' as http;
 
 class Service {
   late JsVMService jsVMService;
@@ -94,12 +95,16 @@ class Service {
     required String table_name,
     String? select,
     String? filterColumn,
+    String? filterColumnIn,
+    List<dynamic>? filterIn,
   }) async {
     final res = await dbService.read(
         filter: filter,
         table_name: table_name,
         select: select,
-        filterColumn: filterColumn);
+        filterColumn: filterColumn,
+        filterColumnIn: filterColumnIn,
+        filterIn: filterIn);
     return res;
   }
 
@@ -125,10 +130,50 @@ class Service {
         table_name: "auth", filterColumn: "public_key", filter: publicKey);
   }
 
-  Future<DBRespons> getTeacherRows({required int id}) async {
+  Future<DBRespons> getUserRows(
+      {required int id, required String table_name}) async {
     return await this
-        .readDB(table_name: "teacher", filterColumn: "id", filter: id);
+        .readDB(table_name: table_name, filterColumn: "id", filter: id);
   }
+
+  Future<void> fetchEventHistory() async {
+    final tst = SupabaseDbInteraction.defaultInstance();
+    final res = await tst.fetchEventHistoryWithRpc();
+  }
+
+  Future<bool> sendNotification({
+    required List<String> tokens,
+    required String title,
+    required String body,
+  }) async {
+    const String serverKey = "xFCB_q1zbSMBCAHC8tpHJiKB-tN4RlgX2HHXNvrJ77Q";
+
+    final response = await http.post(
+      Uri.parse("https://fcm.googleapis.com/fcm/send"),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'key=$serverKey',
+      },
+      body: '''
+      {
+        "registration_ids": ${tokens.map((e) => '"$e"').toList()}, 
+        "notification": {
+          "title": "$title",
+          "body": "$body"
+        }
+      }
+    ''',
+    );
+
+    if (response.statusCode == 200) {
+      print("Notifications sent successfully");
+      return true;
+    } else {
+      print("Failed to send notifications: ${response.body}");
+      return false;
+    }
+  }
+
   // //for future mobile
   // Future<bool> isNfcAvailable() async {
   //   try {

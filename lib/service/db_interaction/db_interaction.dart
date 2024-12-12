@@ -11,6 +11,8 @@ abstract class DbInteraction {
     required String table_name,
     String? select,
     String? filterColumn,
+    String? filterColumnIn,
+    List<dynamic>? filterIn,
   }) {
     throw UnimplementedError("Not implemented");
   }
