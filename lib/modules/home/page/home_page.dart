@@ -172,6 +172,7 @@ class _HomePageState extends State<HomePage> {
                   controller: privetKeyController,
                   decoration: InputDecoration(labelText: "Input privet key: "),
                 ),
+                SizedBox(height: 10),
                 CustomButton(
                     onPressed: () async {
                       logIn(privetKey: privetKeyController.text);
@@ -192,43 +193,19 @@ class _HomePageState extends State<HomePage> {
       backgroundColor: Thems.mainBackgroundColor,
       body: Container(
         padding: EdgeInsets.all(10),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            CustomButton(
-                onPressed: (() async {
-                  await readData();
-                }),
-                text: "readData"),
-            SizedBox(height: 10),
-            CustomButton(
-                onPressed: (() async {
-                  await createData();
-                }),
-                text: "createData"),
-            SizedBox(height: 10),
-            CustomButton(
-                onPressed: (() async {
-                  await updateData();
-                }),
-                text: "updateData"),
-            SizedBox(height: 10),
-            CustomButton(
-                onPressed: (() async {
-                  final key = await service.generateRSAKeyPairInIsolate();
-                  print(key);
-                  print(service.derivePublicKeyFromPrivate(key["privateKey"]!));
-                }),
-                text: "deleteData"),
-            SizedBox(height: 10),
-            CustomButton(onPressed: (() => showLoginModal()), text: "Log In"),
-            SizedBox(height: 10),
-            CustomButton(
-                onPressed: (() => {Modular.to.pushNamed("//home/admin")}),
-                text: "Admin"),
-            SizedBox(height: 10),
-          ],
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              CustomButton(onPressed: (() => showLoginModal()), text: "Log In"),
+              SizedBox(height: 10),
+              CustomButton(
+                  onPressed: (() => {Modular.to.pushNamed("//home/admin")}),
+                  text: "Admin"),
+            ],
+          ),
         ),
       ),
     );

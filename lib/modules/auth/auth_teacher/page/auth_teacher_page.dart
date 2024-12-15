@@ -226,7 +226,10 @@ class _AuthTeacherPageState extends State<AuthTeacherPage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text("You log in by ${data?["surname"]} ${data?["name"]}"),
+                Text(
+                  "You log in by ${data?["surname"]} ${data?["name"]}",
+                  style: TextStyle(fontSize: 20, height: 1.4),
+                ),
                 CustomButton(onPressed: () => logOut(), text: "Log Out"),
               ],
             ),

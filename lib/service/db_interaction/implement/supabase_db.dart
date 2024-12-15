@@ -93,29 +93,16 @@ class SupabaseDbInteraction implements DbInteraction {
     }
   }
 
-  Future<void> fetchEventHistoryWithRpc() async {
-    final supabase = Supabase.instance.client;
+  Future<DBRespons> fetchEventHistoryWithRpc({required int id}) async {
+    try {
+      final supabase = Supabase.instance.client;
 
-    final response = await supabase.rpc('custom_sql_query', params: {
-      'query': """
-      SELECT 
-        event_history.event,
-        event_history.event_details,
-        event_history.time_create_event,
-        teacher.name,
-        teacher.surname,
-        department.department
-      FROM 
-        event_history
-      JOIN teacher ON event_history.creator_id = teacher.id
-      JOIN department ON teacher.department_id = department.id
-    """
-    });
+      final response = await supabase
+          .rpc('get_event_history_bigint', params: {'group_id': id}).select();
 
-    if (response.error != null) {
-      print('Error: ${response.error?.message}');
-    } else {
-      print('Data: ${response.data}');
+      return DBRespons(data: response, status: Status.successful);
+    } catch (error) {
+      throw Exception("error ${error}");
     }
   }
 }

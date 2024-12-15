@@ -136,9 +136,10 @@ class Service {
         .readDB(table_name: table_name, filterColumn: "id", filter: id);
   }
 
-  Future<void> fetchEventHistory() async {
+  Future<DBRespons> fetchEventHistory({required int id}) async {
     final tst = SupabaseDbInteraction.defaultInstance();
-    final res = await tst.fetchEventHistoryWithRpc();
+    final res = await tst.fetchEventHistoryWithRpc(id: id);
+    return res;
   }
 
   Future<bool> sendNotification({

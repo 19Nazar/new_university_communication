@@ -19,9 +19,9 @@ class _AdminPageState extends State<AdminPage> {
     return Scaffold(
       appBar: CustomAppBar(text: "Admin"),
       backgroundColor: Thems.mainBackgroundColor,
-      body: Container(
-        padding: EdgeInsets.all(10),
+      body: Center(
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -31,7 +31,20 @@ class _AdminPageState extends State<AdminPage> {
                   print(key);
                   print(service.derivePublicKeyFromPrivate(key["privateKey"]!));
                 }),
-                text: "Crete key"),
+                text: "Create key pair"),
+            SizedBox(height: 15),
+            CustomButton(
+                onPressed: (() async {}), text: "Add key pair to student"),
+            SizedBox(height: 15),
+            CustomButton(
+                onPressed: (() async {}),
+                text: "Add | Update | Delete student"),
+            SizedBox(height: 15),
+            CustomButton(
+                onPressed: (() async {}),
+                text: "Add | Update | Delete teacher"),
+            SizedBox(height: 15),
+            CustomButton(onPressed: (() async {}), text: "Settings"),
           ],
         ),
       ),

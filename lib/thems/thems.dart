@@ -11,6 +11,5 @@ class Thems {
 
   static final textFontFamily = "Manrope";
 
-  static final textStyle =
-      TextStyle(fontFamily: Thems.textFontFamily, fontSize: 20, height: 1.4);
+  static final textStyle = TextStyle(fontSize: 20, height: 1.4);
 }
